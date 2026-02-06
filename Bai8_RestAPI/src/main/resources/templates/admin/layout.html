@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Admin - BookStore'">Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary-dark: #1a1a2e;
+            --secondary-dark: #16213e;
+            --accent: #e94560;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+        }
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            padding-top: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .admin-sidebar .brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 20px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        .admin-sidebar .nav-main {
+            flex: 1;
+        }
+        .admin-sidebar .nav-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 20px;
+            margin: 2px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active {
+            color: white;
+            background: var(--accent);
+        }
+        .admin-sidebar .nav-link i {
+            width: 25px;
+        }
+        .admin-sidebar .nav-bottom .nav-link {
+            color: rgba(255,255,255,0.5);
+        }
+        .admin-sidebar .nav-bottom .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        .admin-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px 30px;
+            min-height: 100vh;
+        }
+        .admin-header {
+            background: white;
+            padding: 15px 25px;
+            margin: -20px -30px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .admin-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            font-weight: 600;
+        }
+        .table-admin {
+            margin-bottom: 0;
+        }
+        .table-admin th {
+            border-top: none;
+            font-weight: 600;
+            color: #666;
+        }
+        .btn-admin {
+            padding: 8px 20px;
+            border-radius: 8px;
+        }
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Sidebar -->
+    <nav th:fragment="sidebar" class="admin-sidebar">
+        <a href="/admin" class="brand">
+            <i class="bi bi-speedometer2"></i> Quản Trị
+        </a>
+        
+        <!-- Menu chính -->
+        <ul class="nav flex-column nav-main">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/admin' || #httpServletRequest.requestURI == '/admin/dashboard'} ? 'active' : ''" href="/admin">
+                    <i class="bi bi-grid-1x2"></i> Bảng điều khiển
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/books')} ? 'active' : ''" href="/admin/books">
+                    <i class="bi bi-book"></i> Quản lý sách
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/categories')} ? 'active' : ''" href="/admin/categories">
+                    <i class="bi bi-tags"></i> Danh mục
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/orders') || #httpServletRequest.requestURI.startsWith('/orders/admin')} ? 'active' : ''" href="/admin/orders">
+                    <i class="bi bi-bag"></i> Đơn hàng
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/vouchers')} ? 'active' : ''" href="/admin/vouchers">
+                    <i class="bi bi-ticket-perforated"></i> Voucher
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/inventory')} ? 'active' : ''" href="/admin/inventory">
+                    <i class="bi bi-box-seam"></i> Tồn kho
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/reviews')} ? 'active' : ''" href="/admin/reviews">
+                    <i class="bi bi-chat-dots"></i> Bình luận
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/revenue')} ? 'active' : ''" href="/admin/revenue">
+                    <i class="bi bi-graph-up-arrow"></i> Doanh thu
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Menu dưới cùng -->
+        <ul class="nav flex-column nav-bottom">
+            <li class="nav-item">
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Về trang chủ
+                </a>
+            </li>
+            <li class="nav-item">
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent">
+                        <i class="bi bi-box-arrow-left"></i> Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Admin Header -->
+    <div th:fragment="header" class="admin-header">
+        <div>
+            <h4 class="mb-0" th:text="${pageTitle} ?: 'Bảng điều khiển'">Bảng điều khiển</h4>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="me-3" sec:authentication="name">Admin</span>
+            <span class="badge bg-danger" sec:authorize="hasRole('ADMIN')">ADMIN</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+</body>
+</html>

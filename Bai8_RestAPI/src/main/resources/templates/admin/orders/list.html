@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0">Quản lý đơn hàng</h4>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-header">
+                <i class="bi bi-bag"></i> Tất cả đơn hàng (<span th:text="${#lists.size(orders)}">0</span>)
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-admin table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>SĐT</th>
+                            <th>Địa chỉ</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td><code th:text="${#strings.substring(order.id, 0, 8)}">ID</code></td>
+                            <td th:text="${order.customerName}">Name</td>
+                            <td th:text="${order.customerPhone}">Phone</td>
+                            <td>
+                                <span th:text="${#strings.abbreviate(order.shippingAddress, 30)}">Address</span>
+                            </td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">Date</td>
+                            <td class="text-danger fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">0</td>
+                            <td>
+                                <span class="badge bg-warning" th:if="${order.status == 'PENDING'}">Chờ xử lý</span>
+                                <span class="badge bg-info" th:if="${order.status == 'CONFIRMED'}">Đã xác nhận</span>
+                                <span class="badge bg-primary" th:if="${order.status == 'SHIPPING'}">Đang giao</span>
+                                <span class="badge bg-success" th:if="${order.status == 'DELIVERED'}">Đã giao</span>
+                                <span class="badge bg-danger" th:if="${order.status == 'CANCELLED'}">Đã hủy</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary" title="Chi tiết">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CONFIRMED">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Xác nhận"
+                                                th:disabled="${order.status != 'PENDING'}">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="SHIPPING">
+                                        <button type="submit" class="btn btn-sm btn-outline-info" title="Giao hàng"
+                                                th:disabled="${order.status != 'CONFIRMED'}">
+                                            <i class="bi bi-truck"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="DELIVERED">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Hoàn thành"
+                                                th:disabled="${order.status != 'SHIPPING'}">
+                                            <i class="bi bi-check-all"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CANCELLED">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy"
+                                                th:disabled="${order.status == 'DELIVERED' || order.status == 'CANCELLED'}"
+                                                onclick="return confirm('Xác nhận hủy đơn hàng này?')">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(orders)}">
+                            <td colspan="8" class="text-center py-4 text-muted">Chưa có đơn hàng nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+</body>
+</html>

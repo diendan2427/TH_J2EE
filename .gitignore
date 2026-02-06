@@ -1,0 +1,43 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar.sha256
+.mvn/wrapper/maven-wrapper.jar.asc
+
+# Java IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.vscode/
+
+# Spring Boot
+*.log
+
+# MongoDB
+data/db/
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*.bak
+*.tmp
+
+# PDF file
+CMP3025 - TH  LTUD Java.pdf
+
+# Sensitive configuration files
+**/application.properties

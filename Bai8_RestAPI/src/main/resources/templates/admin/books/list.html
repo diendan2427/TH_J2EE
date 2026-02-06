@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0">Quản lý sách</h4>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <!-- View Toggle -->
+                <div class="btn-group" role="group" aria-label="Chế độ xem">
+                    <button type="button" class="btn btn-outline-secondary active" id="btnTableView" onclick="showTableView()">
+                        <i class="bi bi-list-ul"></i> Bảng
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnGridView" onclick="showGridView()">
+                        <i class="bi bi-grid-3x3-gap"></i> Lưới
+                    </button>
+                </div>
+                <a href="/books/add" class="btn btn-primary btn-admin">
+                    <i class="bi bi-plus-circle"></i> Thêm sách mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="admin-card">
+            <div class="card-header">
+                <i class="bi bi-book"></i> Danh sách sách (<span th:text="${#lists.size(books)}">0</span>)
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-admin table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Tác giả</th>
+                            <th>Danh mục</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th style="width: 150px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="book : ${books}">
+                            <td>
+                                <img th:src="${book.imageUrl ?: 'https://via.placeholder.com/60x80'}" 
+                                     style="width: 50px; height: 65px; object-fit: cover; border-radius: 4px;">
+                            </td>
+                            <td>
+                                <strong th:text="${book.title}">Title</strong>
+                                <br>
+                                <small class="text-muted" th:text="${#strings.abbreviate(book.description, 50)}">Desc</small>
+                            </td>
+                            <td th:text="${book.author}">Author</td>
+                            <td>
+                                <span th:if="${book.category}" class="badge bg-secondary" th:text="${book.category.name}">Cat</span>
+                                <span th:unless="${book.category}" class="text-muted">-</span>
+                            </td>
+                            <td class="text-danger fw-bold" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">0</td>
+                            <td>
+                                <span th:if="${book.stock != null && book.stock > 10}" class="badge bg-success" th:text="${book.stock}">0</span>
+                                <span th:if="${book.stock != null && book.stock > 0 && book.stock <= 10}" class="badge bg-warning" th:text="${book.stock}">0</span>
+                                <span th:if="${book.stock == null || book.stock <= 0}" class="badge bg-danger">Hết hàng</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Xác nhận xóa sách này?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(books)}">
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có sách nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="gridView" class="d-none">
+            <div class="admin-card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-book"></i> Danh sách sách (<span th:text="${#lists.size(books)}">0</span>)
+                </div>
+            </div>
+            <div class="row g-4">
+                <div th:each="book : ${books}" class="col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <div class="position-relative">
+                            <img th:src="${book.imageUrl ?: 'https://via.placeholder.com/300x200'}" 
+                                 class="card-img-top" style="height: 180px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span th:if="${book.stock != null && book.stock > 10}" class="badge bg-success">Còn hàng</span>
+                                <span th:if="${book.stock != null && book.stock > 0 && book.stock <= 10}" class="badge bg-warning">Sắp hết</span>
+                                <span th:if="${book.stock == null || book.stock <= 0}" class="badge bg-danger">Hết hàng</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span th:if="${book.category}" class="badge bg-secondary mb-2" th:text="${book.category.name}">Cat</span>
+                            <h6 class="card-title mb-1" th:text="${book.title}">Title</h6>
+                            <p class="text-muted small mb-2" th:text="${book.author}">Author</p>
+                            <p class="text-danger fw-bold mb-0" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0">
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm flex-fill">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </a>
+                                <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-danger btn-sm flex-fill"
+                                   onclick="return confirm('Xác nhận xóa sách này?')">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(books)}" class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle"></i> Chưa có sách nào
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+    <script>
+        // Lưu trạng thái view vào localStorage
+        function showTableView() {
+            document.getElementById('tableView').classList.remove('d-none');
+            document.getElementById('gridView').classList.add('d-none');
+            document.getElementById('btnTableView').classList.add('active');
+            document.getElementById('btnGridView').classList.remove('active');
+            localStorage.setItem('adminBooksView', 'table');
+        }
+        
+        function showGridView() {
+            document.getElementById('tableView').classList.add('d-none');
+            document.getElementById('gridView').classList.remove('d-none');
+            document.getElementById('btnTableView').classList.remove('active');
+            document.getElementById('btnGridView').classList.add('active');
+            localStorage.setItem('adminBooksView', 'grid');
+        }
+        
+        // Khôi phục trạng thái view khi load trang
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedView = localStorage.getItem('adminBooksView');
+            if (savedView === 'grid') {
+                showGridView();
+            } else {
+                showTableView();
+            }
+        });
+    </script>
+</body>
+</html>

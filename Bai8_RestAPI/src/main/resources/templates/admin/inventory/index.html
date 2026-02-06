@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0">Quản lý tồn kho</h4>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Export PDF -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Xuất báo cáo tồn kho</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Xuất báo cáo tồn kho ra file PDF bao gồm:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Danh sách tất cả sản phẩm</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Số lượng tồn kho hiện tại</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Trạng thái hàng hóa</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Tổng giá trị tồn kho</li>
+                        </ul>
+                        <a href="/admin/inventory/export" class="btn btn-primary w-100">
+                            <i class="bi bi-download"></i> Tải xuống PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import PDF -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-up"></i> Import sách từ PDF</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Import danh sách sách từ file PDF. Định dạng mỗi dòng:</p>
+                        <code class="d-block bg-light p-2 mb-3 rounded">
+                            Tiêu đề | Tác giả | Giá | Số lượng | Mô tả
+                        </code>
+                        <form th:action="@{/admin/inventory/import}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Chọn file PDF</label>
+                                <input type="file" name="pdfFile" class="form-control" accept=".pdf" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-upload"></i> Import
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Results -->
+        <div th:if="${importResults}" class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Kết quả import</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Trạng thái</th>
+                                <th>Thông báo</th>
+                                <th>Sách</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${importResults}">
+                                <td>
+                                    <span th:if="${result.success}" class="badge bg-success"><i class="bi bi-check"></i> Thành công</span>
+                                    <span th:unless="${result.success}" class="badge bg-danger"><i class="bi bi-x"></i> Thất bại</span>
+                                </td>
+                                <td th:text="${result.message}">Message</td>
+                                <td>
+                                    <span th:if="${result.book}" th:text="${result.book.title}">Book Title</span>
+                                    <span th:unless="${result.book}" class="text-muted">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+</body>
+</html>

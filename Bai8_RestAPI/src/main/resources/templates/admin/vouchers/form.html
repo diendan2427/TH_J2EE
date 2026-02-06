@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0" th:text="${voucher.id} ? 'Chỉnh sửa voucher' : 'Thêm voucher mới'">Thêm voucher</h4>
+            </div>
+            <a href="/admin/vouchers" class="btn btn-outline-secondary btn-admin">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-header">
+                <i class="bi bi-ticket-perforated"></i> Thông tin voucher
+            </div>
+            <div class="card-body">
+                <form th:action="${voucher.id} ? @{/admin/vouchers/edit/{id}(id=${voucher.id})} : @{/admin/vouchers/add}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mã voucher *</label>
+                            <input type="text" name="code" class="form-control" 
+                                   th:value="${voucher.code}" required
+                                   placeholder="Ví dụ: SALE10, NEWUSER20"
+                                   pattern="[A-Za-z0-9]+" title="Chỉ chấp nhận chữ và số, không dấu cách">
+                            <small class="text-muted">Mã voucher chỉ chứa chữ và số, không dấu cách</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phần trăm giảm giá (%) *</label>
+                            <input type="number" name="discountPercent" class="form-control" 
+                                   th:value="${voucher.discountPercent}" required
+                                   min="1" max="100" step="0.1"
+                                   placeholder="Ví dụ: 10, 20, 50">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <input type="text" name="description" class="form-control" 
+                               th:value="${voucher.description}"
+                               placeholder="Mô tả voucher (tùy chọn)">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Giảm tối đa (VND)</label>
+                            <input type="number" name="maxDiscountAmount" class="form-control" 
+                                   th:value="${voucher.maxDiscountAmount}"
+                                   min="0" step="1000"
+                                   placeholder="Không giới hạn">
+                            <small class="text-muted">Để trống nếu không giới hạn số tiền giảm</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Đơn hàng tối thiểu (VND)</label>
+                            <input type="number" name="minOrderAmount" class="form-control" 
+                                   th:value="${voucher.minOrderAmount}"
+                                   min="0" step="1000"
+                                   placeholder="0">
+                            <small class="text-muted">Số tiền tối thiểu để áp dụng voucher</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số lần sử dụng tối đa</label>
+                            <input type="number" name="maxUses" class="form-control" 
+                                   th:value="${voucher.maxUses}"
+                                   min="1"
+                                   placeholder="Không giới hạn">
+                            <small class="text-muted">Để trống nếu không giới hạn số lần</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Trạng thái</label>
+                            <div class="form-check form-switch mt-2">
+                                <input type="checkbox" name="active" class="form-check-input" 
+                                       th:checked="${voucher.id} ? ${voucher.active} : true"
+                                       value="true">
+                                <label class="form-check-label" th:text="${voucher.active} ? 'Đang hoạt động' : 'Đã tắt'">Hoạt động</label>
+                            </div>
+                            <input type="hidden" name="active" value="false" th:if="false">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ngày bắt đầu</label>
+                            <input type="datetime-local" name="startDate" class="form-control" 
+                                   th:value="${voucher.startDate} ? ${#temporals.format(voucher.startDate, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input type="datetime-local" name="endDate" class="form-control" 
+                                   th:value="${voucher.endDate} ? ${#temporals.format(voucher.endDate, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/admin/vouchers" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> 
+                            <span th:text="${voucher.id} ? 'Cập nhật' : 'Thêm mới'">Thêm mới</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+</body>
+</html>

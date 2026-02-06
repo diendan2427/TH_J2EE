@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4"><i class="bi bi-clipboard-data"></i> Quan ly don hang</h2>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h3 class="text-warning" th:text="${#lists.size(orders)}">0</h3>
+                        <p class="mb-0">Tong don hang</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Ma don</th>
+                            <th>Khach hang</th>
+                            <th>SDT</th>
+                            <th>Ngay dat</th>
+                            <th>Tong tien</th>
+                            <th>Trang thai</th>
+                            <th>Thao tac</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td><code th:text="${#strings.substring(order.id, 0, 8)}">ID</code></td>
+                            <td th:text="${order.customerName}">Name</td>
+                            <td th:text="${order.customerPhone}">Phone</td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">Date</td>
+                            <td class="text-danger fw-bold" 
+                                th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">0</td>
+                            <td>
+                                <span class="order-status status-pending" th:if="${order.status == 'PENDING'}">Cho xac nhan</span>
+                                <span class="order-status status-confirmed" th:if="${order.status == 'CONFIRMED'}">Da xac nhan</span>
+                                <span class="order-status status-shipping" th:if="${order.status == 'SHIPPING'}">Dang giao</span>
+                                <span class="order-status status-delivered" th:if="${order.status == 'DELIVERED'}">Da giao</span>
+                                <span class="order-status status-cancelled" th:if="${order.status == 'CANCELLED'}">Da huy</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CONFIRMED">
+                                        <button type="submit" class="btn btn-success btn-sm" title="Xac nhan" 
+                                                th:disabled="${order.status != 'PENDING'}">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="SHIPPING">
+                                        <button type="submit" class="btn btn-info btn-sm" title="Giao hang"
+                                                th:disabled="${order.status != 'CONFIRMED'}">
+                                            <i class="bi bi-truck"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${#lists.isEmpty(orders)}" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p>Chua co don hang nao</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/layout :: footer"></footer>
+    <div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

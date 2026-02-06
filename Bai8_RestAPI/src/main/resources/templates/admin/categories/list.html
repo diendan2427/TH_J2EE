@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0">Quản lý danh mục</h4>
+            </div>
+            <a href="/admin/categories/add" class="btn btn-primary btn-admin">
+                <i class="bi bi-plus-circle"></i> Thêm danh mục mới
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-header">
+                <i class="bi bi-tags"></i> Danh sách danh mục (<span th:text="${#lists.size(categories)}">0</span>)
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-admin table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Icon</th>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th style="width: 150px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="category : ${categories}">
+                            <td class="text-center">
+                                <i th:class="${'bi ' + (category.icon ?: 'bi-folder') + ' fs-4 text-primary'}"></i>
+                            </td>
+                            <td>
+                                <strong th:text="${category.name}">Name</strong>
+                            </td>
+                            <td class="text-muted" th:text="${category.description ?: '-'}">Description</td>
+                            <td>
+                                <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/admin/categories/delete/{id}(id=${category.id})}" class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Xác nhận xóa danh mục này? Các sách thuộc danh mục này sẽ không bị ảnh hưởng.')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="4" class="text-center py-4 text-muted">Chưa có danh mục nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+</body>
+</html>

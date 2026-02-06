@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0">Quản lý Voucher</h4>
+            </div>
+            <a href="/admin/vouchers/add" class="btn btn-primary btn-admin">
+                <i class="bi bi-plus-circle"></i> Thêm voucher mới
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-header">
+                <i class="bi bi-ticket-perforated"></i> Danh sách voucher (<span th:text="${#lists.size(vouchers)}">0</span>)
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-admin table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã voucher</th>
+                                <th>Mô tả</th>
+                                <th>Giảm giá</th>
+                                <th>Đơn tối thiểu</th>
+                                <th>Sử dụng</th>
+                                <th>Thời hạn</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="voucher : ${vouchers}">
+                                <td>
+                                    <strong class="text-primary" th:text="${voucher.code}">CODE</strong>
+                                </td>
+                                <td th:text="${voucher.description} ?: '-'">Description</td>
+                                <td>
+                                    <span class="badge bg-success" th:text="${voucher.discountPercent} + '%'">10%</span>
+                                    <small th:if="${voucher.maxDiscountAmount}" class="text-muted d-block">
+                                        Tối đa: <span th:text="${#numbers.formatDecimal(voucher.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')}"></span> VND
+                                    </small>
+                                </td>
+                                <td th:text="${voucher.minOrderAmount} ? ${#numbers.formatDecimal(voucher.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + ' VND' : 'Không yêu cầu'">0</td>
+                                <td>
+                                    <span th:text="${voucher.usedCount} ?: '0'">0</span>
+                                    <span th:if="${voucher.maxUses}">/ <span th:text="${voucher.maxUses}">100</span></span>
+                                </td>
+                                <td>
+                                    <small th:if="${voucher.startDate}" th:text="'Từ: ' + ${#temporals.format(voucher.startDate, 'dd/MM/yyyy')}"></small>
+                                    <small th:if="${voucher.endDate}" th:text="'Đến: ' + ${#temporals.format(voucher.endDate, 'dd/MM/yyyy')}" class="d-block"></small>
+                                    <small th:unless="${voucher.startDate} or ${voucher.endDate}" class="text-muted">Không giới hạn</small>
+                                </td>
+                                <td>
+                                    <span th:if="${voucher.active}" class="badge bg-success">Hoạt động</span>
+                                    <span th:unless="${voucher.active}" class="badge bg-secondary">Tắt</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.id})}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/admin/vouchers/toggle/{id}(id=${voucher.id})}" class="btn btn-sm btn-outline-info"
+                                       th:title="${voucher.active} ? 'Tắt voucher' : 'Bật voucher'">
+                                        <i th:class="${voucher.active} ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
+                                    </a>
+                                    <a th:href="@{/admin/vouchers/delete/{id}(id=${voucher.id})}" class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Xác nhận xóa voucher này?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(vouchers)}">
+                                <td colspan="8" class="text-center py-4 text-muted">Chưa có voucher nào</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Server Port
+server.port=8080
+
+# MongoDB Configuration
+spring.data.mongodb.uri=mongodb://localhost:27017/bookstore_api
+
+# Thymeleaf Configuration
+spring.thymeleaf.cache=false
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+
+# File Upload Configuration
+file.upload.dir=uploads
+server.servlet.multipart.max-file-size=10MB
+server.servlet.multipart.max-request-size=10MB
+
+# Logging
+logging.level.com.hutech.bai8=DEBUG
+
+# MoMo Payment Configuration (Sandbox - Updated 2024)
+# Lay credentials moi tai: https://developers.momo.vn
+momo.partner-code=YOUR_MOMO_PARTNER_CODE
+momo.access-key=YOUR_MOMO_ACCESS_KEY
+momo.secret-key=YOUR_MOMO_SECRET_KEY
+momo.api-url=https://test-payment.momo.vn/v2/gateway/api/create
+momo.ipn-url=http://localhost:8080/momo/ipn
+momo.redirect-url=http://localhost:8080/momo/return
+
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=email,profile

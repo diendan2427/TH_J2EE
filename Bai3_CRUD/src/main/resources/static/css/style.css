@@ -1,0 +1,25 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.btn {
+    border-radius: 5px;
+}

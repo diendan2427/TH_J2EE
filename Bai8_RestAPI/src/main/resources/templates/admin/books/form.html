@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="admin/layout :: head"></head>
+<body>
+    <nav th:replace="admin/layout :: sidebar"></nav>
+
+    <main class="admin-content">
+        <div class="admin-header">
+            <div>
+                <h4 class="mb-0" th:text="${book.id != null} ? 'Chỉnh sửa sách' : 'Thêm sách mới'">Form</h4>
+            </div>
+            <a href="/admin/books" class="btn btn-outline-secondary btn-admin">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </a>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-body p-4">
+                <form th:action="${book.id != null} ? @{/books/edit/{id}(id=${book.id})} : @{/books/add}"
+                      method="post" enctype="multipart/form-data" th:object="${book}">
+                    
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tiêu đề *</label>
+                                <input type="text" class="form-control form-control-lg" th:field="*{title}" required
+                                       placeholder="Nhập tiêu đề sách">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Tác giả *</label>
+                                    <input type="text" class="form-control" th:field="*{author}" required
+                                           placeholder="Nhập tên tác giả">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Danh mục</label>
+                                    <select name="categoryId" class="form-select">
+                                        <option value="">-- Chọn danh mục --</option>
+                                        <option th:each="cat : ${categories}" 
+                                                th:value="${cat.id}" 
+                                                th:text="${cat.name}"
+                                                th:selected="${book.category != null && book.category.id == cat.id}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Giá (VND) *</label>
+                                    <input type="number" class="form-control" th:field="*{price}" min="0" required
+                                           placeholder="0">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Số lượng tồn kho</label>
+                                    <input type="number" class="form-control" th:field="*{stock}" min="0"
+                                           placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mô tả</label>
+                                <textarea class="form-control" th:field="*{description}" rows="5"
+                                          placeholder="Nhập mô tả chi tiết về sách..."></textarea>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" th:field="*{active}" id="activeCheck">
+                                <label class="form-check-label" for="activeCheck">Sản phẩm đang kinh doanh</label>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Image Upload -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="bi bi-image"></i> Hình ảnh sản phẩm
+                                </div>
+                                <div class="card-body text-center">
+                                    <!-- Preview Image -->
+                                    <div class="mb-3">
+                                        <img id="imagePreview" 
+                                             th:src="${book.imageUrl ?: 'https://via.placeholder.com/200x250?text=No+Image'}" 
+                                             class="img-fluid rounded shadow-sm"
+                                             style="max-height: 250px; width: auto;">
+                                    </div>
+                                    
+                                    <!-- File Upload -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Chọn ảnh từ máy tính</label>
+                                        <input type="file" class="form-control" name="imageFile" 
+                                               accept="image/*" onchange="previewImage(this)">
+                                        <small class="text-muted">Định dạng: JPG, PNG, GIF. Tối đa 10MB</small>
+                                    </div>
+
+                                    <!-- Keep existing image info -->
+                                    <div th:if="${book.imageUrl}" class="text-muted small">
+                                        <i class="bi bi-info-circle"></i> Để trống nếu muốn giữ ảnh cũ
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between">
+                        <a href="/admin/books" class="btn btn-outline-secondary btn-admin">
+                            <i class="bi bi-x-lg"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-admin px-5">
+                            <i class="bi bi-check-lg"></i> Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="admin/layout :: scripts"></div>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

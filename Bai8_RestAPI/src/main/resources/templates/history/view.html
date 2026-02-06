@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item active">Lịch sử xem</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-clock-history"></i> Lịch sử xem sản phẩm</h2>
+            <a th:if="${!#lists.isEmpty(history)}" href="/history/clear" 
+               class="btn btn-outline-danger"
+               onclick="return confirm('Xóa toàn bộ lịch sử xem?')">
+                <i class="bi bi-trash"></i> Xóa lịch sử
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${#lists.isEmpty(history)}" class="text-center py-5">
+            <i class="bi bi-clock-history display-1 text-muted"></i>
+            <h4 class="mt-3">Chưa có lịch sử xem</h4>
+            <p class="text-muted">Các sản phẩm bạn đã xem sẽ xuất hiện ở đây</p>
+            <a href="/books" class="btn btn-primary"><i class="bi bi-grid"></i> Khám phá sản phẩm</a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(history)}" class="row g-4">
+            <div th:each="item : ${history}" class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card book-card h-100 position-relative">
+                    <!-- Delete button -->
+                    <a th:href="@{/history/delete/{id}(id=${item.id})}" 
+                       class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 z-index-1"
+                       onclick="return confirm('Xóa khỏi lịch sử?')">
+                        <i class="bi bi-x"></i>
+                    </a>
+                    
+                    <img th:src="${item.book.imageUrl ?: 'https://picsum.photos/seed/' + item.book.id + '/300/400'}" 
+                         class="card-img-top" th:alt="${item.book.title}" style="height: 250px; object-fit: cover;">
+                    
+                    <div class="card-body">
+                        <span th:if="${item.book.category}" class="category-badge mb-2 d-inline-block" 
+                              th:text="${item.book.category.name}">Category</span>
+                        <h6 class="card-title text-truncate" th:text="${item.book.title}" th:title="${item.book.title}">Title</h6>
+                        <p class="card-text text-muted small text-truncate" th:text="${item.book.author}">Author</p>
+                        <p class="price-tag mb-2" th:text="${#numbers.formatDecimal(item.book.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</p>
+                        <small class="text-muted">
+                            <i class="bi bi-clock"></i> Đã xem: <span th:text="${#temporals.format(item.viewedAt, 'dd/MM/yyyy HH:mm')}">Date</span>
+                        </small>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/books/detail/{id}(id=${item.book.id})}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                <i class="bi bi-eye"></i> Xem lại
+                            </a>
+                            <form th:action="@{/cart/add/{id}(id=${item.book.id})}" method="post" class="flex-grow-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" th:disabled="${item.book.stock <= 0}">
+                                    <i class="bi bi-cart-plus"></i> 
+                                    <span th:text="${item.book.stock > 0} ? 'Mua' : 'Hết'">Mua</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/layout :: footer"></footer>
+    <div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>
