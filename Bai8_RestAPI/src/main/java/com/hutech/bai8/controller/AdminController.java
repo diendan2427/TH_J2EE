@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -64,5 +65,26 @@ public class AdminController {
         model.addAttribute("orders", orderService.getAllOrders());
         model.addAttribute("cartCount", cart.getTotalItems());
         return "admin/orders/list";
+    }
+
+    @PostMapping("/orders/{id}/status")
+    public String updateOrderStatus(@PathVariable String id,
+                                     @RequestParam String status,
+                                     RedirectAttributes redirectAttributes) {
+        // Check if order can be updated
+        java.util.Optional<com.hutech.bai8.model.Order> orderOpt = orderService.getOrderById(id);
+        if (orderOpt.isPresent()) {
+            com.hutech.bai8.model.Order order = orderOpt.get();
+            // Prevent editing if order is already delivered or cancelled
+            if ("DELIVERED".equals(order.getStatus()) || "CANCELLED".equals(order.getStatus())) {
+                redirectAttributes.addFlashAttribute("error", 
+                    "Không thể cập nhật đơn hàng đã giao hoặc đã hủy!");
+                return "redirect:/admin/orders";
+            }
+        }
+        
+        orderService.updateOrderStatus(id, status);
+        redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
+        return "redirect:/admin/orders";
     }
 }

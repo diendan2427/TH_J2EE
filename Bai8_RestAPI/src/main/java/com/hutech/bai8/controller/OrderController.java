@@ -69,8 +69,8 @@ public class OrderController {
     public String updateStatus(@PathVariable String id, 
                               @RequestParam String status,
                               RedirectAttributes redirectAttributes) {
-        orderService.updateOrderStatus(id, status);
-        redirectAttributes.addFlashAttribute("success", "Cap nhat trang thai thanh cong!");
-        return "redirect:/orders/admin";
+        // Redirect to the new admin route
+        redirectAttributes.addFlashAttribute("success", "Đang chuyển hướng...");
+        return "redirect:/admin/orders";
     }
 }

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head">
+    <title>Import Sách từ Excel</title>
+</head>
+<body>
+    <div th:replace="fragments/layout :: navbar"></div>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div th:replace="admin/layout :: sidebar"></div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-excel"></i> Import Sách từ Excel</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Instructions -->
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-info-circle"></i> Hướng dẫn sử dụng</h5>
+                            <ol>
+                                <li>Tải file mẫu Excel bên dưới</li>
+                                <li>Điền thông tin sách vào file theo đúng cấu trúc</li>
+                                <li>Lưu file và upload lên hệ thống</li>
+                                <li>Hệ thống sẽ tự động import và báo kết quả</li>
+                            </ol>
+                            <hr>
+                            <p class="mb-0"><strong>Lưu ý:</strong></p>
+                            <ul class="mb-0">
+                                <li>Các trường <span class="text-danger">*</span> là bắt buộc</li>
+                                <li>CategoryId phải tồn tại trong hệ thống (xem danh sách bên dưới)</li>
+                                <li>Giá và số lượng phải là số dương</li>
+                                <li>Chỉ hỗ trợ file .xlsx hoặc .xls</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Download Template -->
+                        <div class="mb-4">
+                            <a href="/admin/books/import/template" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-download"></i> Tải file mẫu Excel (.xlsx)
+                            </a>
+                            <a href="/admin/books/import/template-csv" class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> Tải file mẫu CSV (UTF-8)
+                            </a>
+                            <div class="form-text mt-2">
+                                <i class="bi bi-info-circle"></i> 
+                                <strong>Khuyến nghị:</strong> Dùng file Excel (.xlsx) để tránh lỗi font tiếng Việt. 
+                                Nếu dùng CSV, hãy xem hướng dẫn mở file đúng cách <a href="https://docs.google.com/document/d/e/2PACX-1vQf3v_K3j8f5v6H9b7D8c4F3e5G6h7I8j9K0l1M2n3O4p5Q6r7S8t9U0v1W2x3Y4z5A6B7C8D9E0F1" target="_blank">tại đây</a>.
+                            </div>
+                        </div>
+                        
+                        <!-- Available Categories -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="bi bi-tags"></i> Danh sách Category ID có sẵn</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Tên danh mục</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>6982c0cea732c155aa614808</code></td>
+                                            <td>Lập trình</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>6982c0cea732c155aa614809</code></td>
+                                            <td>Kinh tế</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>6982c0cea732c155aa61480a</code></td>
+                                            <td>Văn học</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>6982c0cea732c155aa61480b</code></td>
+                                            <td>Khoa học</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>6982c0cea732c155aa61480c</code></td>
+                                            <td>Kỹ năng sống</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload Form -->
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-upload"></i> Upload File Excel</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="importForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label">Chọn file Excel</label>
+                                        <input type="file" class="form-control" id="file" name="file" 
+                                               accept=".xlsx,.xls" required>
+                                        <div class="form-text">Chỉ chấp nhận file .xlsx hoặc .xls</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-upload"></i> Import Sách
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Result Area -->
+                        <div id="resultArea" class="mt-4" style="display: none;">
+                            <div class="card">
+                                <div class="card-header" id="resultHeader">
+                                    Kết quả Import
+                                </div>
+                                <div class="card-body">
+                                    <div id="resultContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/layout :: footer"></div>
+    
+    <script th:inline="javascript">
+        document.getElementById('importForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData();
+            var fileInput = document.getElementById('file');
+            formData.append('file', fileInput.files[0]);
+            
+            // Show loading
+            var submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang xử lý...';
+            
+            fetch('/admin/books/import', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultArea = document.getElementById('resultArea');
+                var resultHeader = document.getElementById('resultHeader');
+                var resultContent = document.getElementById('resultContent');
+                
+                resultArea.style.display = 'block';
+                
+                if (data.success) {
+                    resultHeader.className = 'card-header bg-success text-white';
+                    resultHeader.innerHTML = '<i class="bi bi-check-circle"></i> Import thành công!';
+                } else {
+                    resultHeader.className = 'card-header bg-warning';
+                    resultHeader.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Import có lỗi';
+                }
+                
+                var html = '<div class="row">';
+                html += '<div class="col-md-4"><div class="alert alert-success"><strong>Thành công:</strong> ' + data.successCount + ' sách</div></div>';
+                html += '<div class="col-md-4"><div class="alert alert-danger"><strong>Lỗi:</strong> ' + data.errorCount + ' sách</div></div>';
+                html += '<div class="col-md-4"><div class="alert alert-info"><strong>Tổng:</strong> ' + data.totalRows + ' sách</div></div>';
+                html += '</div>';
+                
+                if (data.successMessages && data.successMessages.length > 0) {
+                    html += '<h6 class="text-success">Danh sách thành công:</h6>';
+                    html += '<ul class="list-group mb-3">';
+                    data.successMessages.slice(0, 10).forEach(function(msg) {
+                        html += '<li class="list-group-item list-group-item-success">' + msg + '</li>';
+                    });
+                    if (data.successMessages.length > 10) {
+                        html += '<li class="list-group-item">... và ' + (data.successMessages.length - 10) + ' sách khác</li>';
+                    }
+                    html += '</ul>';
+                }
+                
+                if (data.errors && data.errors.length > 0) {
+                    html += '<h6 class="text-danger">Danh sách lỗi:</h6>';
+                    html += '<ul class="list-group">';
+                    data.errors.forEach(function(err) {
+                        html += '<li class="list-group-item list-group-item-danger">' + err + '</li>';
+                    });
+                    html += '</ul>';
+                }
+                
+                resultContent.innerHTML = html;
+            })
+            .catch(error => {
+                alert('Lỗi: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-upload"></i> Import Sách';
+            });
+        });
+    </script>
+</body>
+</html>

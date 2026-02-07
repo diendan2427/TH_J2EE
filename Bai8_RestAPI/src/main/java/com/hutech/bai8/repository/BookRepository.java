@@ -34,4 +34,32 @@ public interface BookRepository extends MongoRepository<Book, String> {
            "{ 'description': { $regex: ?0, $options: 'i' } } " +
            "] }")
     Page<Book> searchByKeyword(String keyword, Pageable pageable);
+    
+    // Lọc theo khoảng giá
+    @Query("{ 'price': { $gte: ?0, $lte: ?1 } }")
+    Page<Book> findByPriceBetween(double minPrice, double maxPrice, Pageable pageable);
+    
+    // Lọc theo danh mục và khoảng giá
+    @Query("{ 'category': ?0, 'price': { $gte: ?1, $lte: ?2 } }")
+    Page<Book> findByCategoryAndPriceBetween(Category category, double minPrice, double maxPrice, Pageable pageable);
+    
+    // Tìm kiếm với lọc giá
+    @Query("{ $and: [ " +
+           "{ $or: [ " +
+           "{ 'title': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'author': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'description': { $regex: ?0, $options: 'i' } } " +
+           "] }, " +
+           "{ 'price': { $gte: ?1, $lte: ?2 } } " +
+           "] }")
+    Page<Book> searchByKeywordAndPriceBetween(String keyword, double minPrice, double maxPrice, Pageable pageable);
+    
+    // Tìm sách theo danh sách ID (cho autocomplete)
+    List<Book> findByIdIn(List<String> ids);
+    
+    // Tìm sách có giá cao nhất
+    List<Book> findTop5ByOrderByPriceDesc();
+    
+    // Tìm sách mới nhất
+    List<Book> findTop10ByOrderByIdDesc();
 }

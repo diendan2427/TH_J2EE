@@ -59,20 +59,48 @@ public class HomeController {
     @GetMapping("/books")
     public String listBooks(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Integer minRating,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
         
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("title").ascending());
+        // Xây dựng Sort
+        Sort sort = Sort.by(sortBy);
+        if ("desc".equalsIgnoreCase(sortOrder)) {
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
+        
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, sort);
         Page<Book> bookPage;
         
-        if (keyword != null && !keyword.isEmpty()) {
-            bookPage = bookService.searchBooks(keyword, pageable);
-            model.addAttribute("keyword", keyword);
+        // Lấy category nếu có
+        Category category = null;
+        if (categoryId != null && !categoryId.isEmpty()) {
+            category = categoryService.getCategoryById(categoryId).orElse(null);
+        }
+        
+        // Tìm kiếm với các bộ lọc
+        if (keyword != null && !keyword.isEmpty() || minPrice != null || maxPrice != null || category != null) {
+            bookPage = bookService.searchBooksWithFilters(keyword, category, minPrice, maxPrice, pageable);
         } else {
             bookPage = bookService.getAllBooks(pageable);
         }
         
+        // Lọc theo rating nếu có
+        if (minRating != null && minRating > 0) {
+            // TODO: Implement rating filter after review system is fully integrated
+        }
+        
         List<Category> categories = categoryService.getAllCategories();
+        
+        // Lấy khoảng giá cho slider
+        BookService.PriceRange priceRange = bookService.getPriceRange();
         
         model.addAttribute("books", bookPage.getContent());
         model.addAttribute("bookPage", bookPage);
@@ -80,6 +108,16 @@ public class HomeController {
         model.addAttribute("totalPages", bookPage.getTotalPages());
         model.addAttribute("totalItems", bookPage.getTotalElements());
         model.addAttribute("categories", categories);
+        model.addAttribute("priceRange", priceRange);
+        
+        // Giữ lại các giá trị filter để hiển thị
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("minRating", minRating);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortOrder", sortOrder);
         model.addAttribute("cartCount", cart.getTotalItems());
         return "books/list";
     }

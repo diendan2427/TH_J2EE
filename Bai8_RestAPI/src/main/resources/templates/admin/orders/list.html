@@ -16,6 +16,10 @@
             <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
         <div class="admin-card">
             <div class="card-header">
@@ -57,28 +61,28 @@
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <div class="btn-group btn-group-sm">
-                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
                                         <input type="hidden" name="status" value="CONFIRMED">
                                         <button type="submit" class="btn btn-sm btn-outline-success" title="Xác nhận"
                                                 th:disabled="${order.status != 'PENDING'}">
                                             <i class="bi bi-check"></i>
                                         </button>
                                     </form>
-                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
                                         <input type="hidden" name="status" value="SHIPPING">
                                         <button type="submit" class="btn btn-sm btn-outline-info" title="Giao hàng"
                                                 th:disabled="${order.status != 'CONFIRMED'}">
                                             <i class="bi bi-truck"></i>
                                         </button>
                                     </form>
-                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
                                         <input type="hidden" name="status" value="DELIVERED">
                                         <button type="submit" class="btn btn-sm btn-outline-success" title="Hoàn thành"
                                                 th:disabled="${order.status != 'SHIPPING'}">
                                             <i class="bi bi-check-all"></i>
                                         </button>
                                     </form>
-                                    <form th:action="@{/orders/admin/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                    <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
                                         <input type="hidden" name="status" value="CANCELLED">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy"
                                                 th:disabled="${order.status == 'DELIVERED' || order.status == 'CANCELLED'}"
